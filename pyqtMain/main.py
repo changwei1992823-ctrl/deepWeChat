@@ -15,6 +15,7 @@ import resource
 
 
 from wxHd import wxHandle
+from deepHd import deepHandle
 import requests
 
 from functools import partial
@@ -25,7 +26,7 @@ sys.utils = utils
 
 from PyQt5 import QtMultimedia
 
-class MainWindow(QMainWindow, wxHandle):
+class MainWindow(QMainWindow, wxHandle, deepHandle):
     finish = pyqtSignal()
     # resized = pyqtSignal()
     def __init__(self, parent=None):
@@ -60,32 +61,17 @@ class MainWindow(QMainWindow, wxHandle):
         GM["mainScene"] = self
         self.initDatas()
 
+        self.replayClean()
+        self.openTimer()
+        webHandleObj.startThread()
 
-        # self.page8Time = 0
-        # self.hasEnter = False
-        # self.replayClean()
-        # self.addEvents()
-        # self.openTimer()
-        
-        # self.lBInit()
-        # self.ckUpdateTime = 0
-        # self.ckMcTime = 0
-
-        # self.readDataOver()
-        # webHandleObj.startThread()
-
-        # if GM["needLogin"] == False:
-        #     self.lb_1_8.setText("")
-        #     self.lb_1_9.setText("")
-        #     self.enterPanel()
-        #     self.wxHdInit()
-        #     self.hasLogin = True
-        # else:
-        #     self.needCkTime = True
-        #     self.lb_1_8.setText("软件到期时间:")
-
-        # self.reviewZhu()
-        # self.pushDelay(3, self.jieci)
+        if GM["needLogin"] == False:
+            self.lb_1_8.setText("")
+            self.lb_1_9.setText("")
+            self.hasLogin = True
+        else:
+            self.needCkTime = True
+            self.lb_1_8.setText("软件到期时间:")
 
         self.openOver = True
 
@@ -170,6 +156,11 @@ class MainWindow(QMainWindow, wxHandle):
         if not self.openOver:
             return
 
+        try:
+            self.save_deep_history()
+        except Exception:
+            pass
+
         GM["onClose"] = True
         
         if GM["debug"]:
@@ -253,6 +244,7 @@ class MainWindow(QMainWindow, wxHandle):
             GM["zhuoMian"] = me
 
         self.initUi()
+        self.deepInit()
         pass
     # 软件名称
     def initWindowName(self):
@@ -331,6 +323,9 @@ class MainWindow(QMainWindow, wxHandle):
             self.onUpdateOneTime -= 1
             self.callUpdate(1)
             self.pg1Update(1)
+
+    def pg1Update(self, dt):
+        pass
 
     def pushUpdate(self, allTime, func):
         task = {}

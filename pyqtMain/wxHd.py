@@ -40,19 +40,12 @@ class wxHandle(Ui_MainWindow):
 	# 这个要等到界面出现才能执行
 	def wxHdInit(self):
 		print("hookMd", config["set_1"]["hookMd"])
-		if config["set_1"]["hookMd"] == 2:
-			GM["sureUrl"] = GM["sureUrl2"]
-			GM["baseApi"] = GM["baseApi2"]
-		elif config["set_1"]["hookMd"] == 3:
+		if config["set_1"]["hookMd"] == 1:
 			GM["sureUrl"] = GM["sureUrl3"]
 			GM["baseApi"] = GM["baseApi3"]
-		elif config["set_1"]["hookMd"] == 4:
+		elif config["set_1"]["hookMd"] == 2:
 			GM["sureUrl"] = GM["sureUrl4"]
 			GM["baseApi"] = GM["baseApi4"]
-		else:
-			GM["sureUrl"] = GM["sureUrl1"]
-			GM["baseApi"] = GM["baseApi1"]
-			web.headers['Content-Type'] = 'application/json'
 		# self.replayClean()
 		self.withWarn = False
 		# self.lb_9_1.setReadOnly(True)
@@ -95,24 +88,19 @@ class wxHandle(Ui_MainWindow):
 		print("handleIsCanUseWx", reply)
 		er = reply.error()
 		if er == QtNetwork.QNetworkReply.NoError:
-			if config["set_1"]["hookMd"] == 1:
-				web.headers['Content-Type'] = 'application/json'
 			print("可以正常的控制微信")
 			self.sureCanUseWx()
 			self.inHandleWx = False
 			self.updateTime = 100
 		else:
-			if config["set_1"]["hookMd"] == 2:
-				self.warnCantUseWx()
-				# self.inHandleWx = False
-			elif config["set_1"]["hookMd"] == 3:
+			if config["set_1"]["hookMd"] == 1:
 				if self.tryTime < 2:
 					print("发生了错误.3,估计是服务器没有开")
 					self.startMyShou()
 				else:
 					self.warnCantUseWx()
 					self.inHandleWx = False
-			elif config["set_1"]["hookMd"] == 4:
+			elif config["set_1"]["hookMd"] == 2:
 				if self.tryTime < 2:
 					print("发生了错误.4,估计是服务器没有开")
 					self.startMyShou("ConsoleApp4.exe")
@@ -176,9 +164,6 @@ class wxHandle(Ui_MainWindow):
 		if self.canUseWx:
 			self.cbx_2_1_curText = self.cbx_2_1.currentText()
 			self.cbx_2_2_curText = self.cbx_2_2.currentText()
-			self.cbx_2_3_curText = self.cbx_2_3.currentText()
-			self.cbx_2_4_curText = self.cbx_2_4.currentText()
-			self.cbx_2_5_curText = self.cbx_2_5.currentText()
 			self.getChatList()
 		else:
 			self.replayWxHd()
@@ -302,27 +287,18 @@ wxid nickname phonenumber wxcount nation
 	def getMyMessage(self):
 		url = GM["baseApi"]
 		json2 = {"type": 47}
-		if config["set_1"]["hookMd"] == 2:
-			json2 = None
-			url = GM["baseApi"] + "GetSelfLoginInfo"
-		elif config["set_1"]["hookMd"] == 3:
+		if config["set_1"]["hookMd"] == 1:
 			json2 = None
 			url = GM["baseApi"] + "GetSelfInfo"
-		elif config["set_1"]["hookMd"] == 4:
+		elif config["set_1"]["hookMd"] == 2:
 			json2 = None
 			url = GM["baseApi"] + "get_profile_cache"
-		elif config["set_1"]["hookMd"] == 1:
-			url = GM["baseApi"] + "account"
 		try:
 			data = web.post(url, [], json2)
 			if data.status_code == 200:
 				mJson = json.loads(data.text)
 				# print("mJson", mJson)
 				if config["set_1"]["hookMd"] == 2:
-					mJson["phonenumber"] = mJson["tel"]
-					mJson["wxcount"] = mJson["account"]
-					mJson["nation"] = mJson["country"]
-				elif config["set_1"]["hookMd"] == 4:
 					if "UserInfo" in mJson:
 						mJson["nickname"] = mJson["UserInfo"]["NickName"]["String"]
 						mJson["wxid"] = mJson["UserInfo"]["UserName"]["String"]
@@ -332,13 +308,6 @@ wxid nickname phonenumber wxcount nation
 						if "UserInfoExt" in mJson:
 							if "RegCountry" in mJson["UserInfoExt"]:
 								mJson["nation"] = mJson["UserInfoExt"]["RegCountry"]
-				elif config["set_1"]["hookMd"] == 1:
-					if mJson["code"] == 0:
-						mJson = mJson["data"]
-						mJson["phonenumber"] = mJson["phone"]
-						mJson["wxcount"] = mJson["username"]
-						mJson["nation"] = mJson["country"]
-						mJson["nickname"] = mJson["nick"]
 				if "wxid" in mJson:
 					pass
 				elif "data" in mJson and "wxid" in mJson["data"]:
@@ -366,24 +335,8 @@ wxid nickname phonenumber wxcount nation
 		}
 		print("agreeFriend", json2)
 		if config["set_1"]["hookMd"] == 1:
-			url = GM["baseApi"] + "verify_contact"
-			json2 = {
-			    "wxid": dic["alias"],
-				"remark": "",
-				"ticket": dic["ticket"],
-				"scene": dic["scene"],
-				"opcode": dic["opcode"],
-			}
-		elif config["set_1"]["hookMd"] == 2:
-			url = GM["baseApi"] + "VerifyFriend"
-			json2 = {
-			    "v3": dic["encryptusername"],
-			    "v4": dic["ticket"],
-			    "role": "8"
-			}
-		elif config["set_1"]["hookMd"] == 3:
 			return
-		elif config["set_1"]["hookMd"] == 4:
+		elif config["set_1"]["hookMd"] == 2:
 			url = GM["baseApi"] + "accept_friend"
 			json2 = {
 			    "v3": dic["encryptusername"],
@@ -421,13 +374,6 @@ wxid nickname phonenumber wxcount nation
 			"msg": msg
 		}
 		if config["set_1"]["hookMd"] == 2:
-			url = GM["baseApi"] + "AddNewFriend"
-			json2 = {
-			    "v3_wxid": wxid,
-			    "desc": msg,
-			    "type": "15"
-			}
-		elif config["set_1"]["hookMd"] == 4:
 			url = GM["baseApi"] + "add_friend"
 			json2 = {
 				"wxid": wxid,
@@ -464,15 +410,9 @@ wxid nickname phonenumber wxcount nation
 		json2 = {"type": 14}
 		if config["set_1"]["hookMd"] == 1:
 			json2 = None
-			url = GM["baseApi"] + "contacts2"
-		elif config["set_1"]["hookMd"] == 2:
-			json2 = None
-			url = GM["baseApi"] + "GetFriendAndChatRoomList"
-		elif config["set_1"]["hookMd"] == 3:
-			json2 = None
 			url = GM["baseApi"] + "GetContacts"
 			# print("url", url)
-		elif config["set_1"]["hookMd"] == 4:
+		elif config["set_1"]["hookMd"] == 2:
 			json2 = None
 			url = GM["baseApi"] + "get_frien_lists"
 		try:
@@ -484,46 +424,7 @@ wxid nickname phonenumber wxcount nation
 			if data.status_code == 200:
 				mJson = json.loads(data.text)
 				wxQunTab = []
-				if config["set_1"]["hookMd"] == 1:
-					result = []
-					for dic in mJson["data"]:
-						newDic = {
-							"wxid": dic["username"],
-							"wxcount": dic["alias"],
-							"nickname": dic["nick_name"],
-						}
-						if dic["remark"] != "":
-							newDic["nickname"] = dic["remark"]
-						if dic["local_type"] == 1 or dic["local_type"] == 2:
-							# print("dic", dic)
-							result.append(newDic)
-					mJson["result"] = result
-				elif config["set_1"]["hookMd"] == 2:
-					result = []
-					if "friend" in mJson:
-						for dic in mJson["friend"]:
-							if "account" in dic:
-								dic["wxcount"] = dic["account"]
-							else:
-								dic["wxcount"] = ""
-							if "gid" in dic and "wxid" not in dic:
-								dic["wxid"] = dic["gid"]
-							if "gname" in dic and "nickname" not in dic:
-								dic["nickname"] = dic["gname"]
-							result.append(dic)
-					if "chatroom" in mJson:
-						for dic in mJson["chatroom"]:
-							if "account" in dic:
-								dic["wxcount"] = dic["account"]
-							else:
-								dic["wxcount"] = ""
-							if "gid" in dic and "wxid" not in dic:
-								dic["wxid"] = dic["gid"]
-							if "gname" in dic and "nickname" not in dic:
-								dic["nickname"] = dic["gname"]
-							result.append(dic)
-					mJson["result"] = result
-				elif config["set_1"]["hookMd"] == 4:
+				if config["set_1"]["hookMd"] == 2:
 					if "data" in mJson:
 						data = mJson["data"]
 						for dic in data:
@@ -629,10 +530,10 @@ wxid nickname phonenumber wxcount nation
 			print("getChatList.error", e)
 			if self.tryTime < 4:
 				self.tryTime += 1
-				if config["set_1"]["hookMd"] == 3:
+				if config["set_1"]["hookMd"] == 1:
 					time.sleep(0.4)
 					self.startMyShou()
-				elif config["set_1"]["hookMd"] == 4:
+				elif config["set_1"]["hookMd"] == 2:
 					time.sleep(0.4)
 					self.startMyShou("ConsoleApp4.exe")
 
@@ -737,25 +638,12 @@ wxid nickname phonenumber wxcount nation
 				"card_name": card_name,
 			}
 			if config["set_1"]["hookMd"] == 1:
-				json2 = {
-					"username": card_wxid,
-					"sendto": to_wxid,
-				}
-				url = GM["baseApi"] + "send_mingpian"
-			elif config["set_1"]["hookMd"] == 2:
-				json2 = {
-					"towxid": to_wxid,
-					"fromwxid": card_wxid,
-					"nickname": card_name,
-				}
-				url = GM["baseApi"] + "SendCardMsg"
-			elif config["set_1"]["hookMd"] == 3:
 				url = GM["baseApi"] + "SendMingPian"
 				json2 = {
 					"wxid": to_wxid,
 					"msg": f"<?xml version='1.0'?><msg username='{card_wxid}' nickname='{card_name}'/>"
 				}
-			elif config["set_1"]["hookMd"] == 4:
+			elif config["set_1"]["hookMd"] == 2:
 				json2 = {
 					"towxid": to_wxid,
 					"fromwxid": card_wxid,
@@ -792,25 +680,12 @@ wxid nickname phonenumber wxcount nation
 				"card_name": self.myWxMsg["nickname"],
 			}
 			if config["set_1"]["hookMd"] == 1:
-				url = GM["baseApi"] + "send_mingpian"
-				json2 = {
-					"username": self.myWxMsg["wxid"],
-					"sendto": to_wxid,
-				}
-			elif config["set_1"]["hookMd"] == 2:
-				json2 = {
-					"towxid": to_wxid,
-					"fromwxid": self.myWxMsg["wxid"], # 这里要用 wxcount 而非 wxid
-					"nickname": self.myWxMsg["nickname"],
-				}
-				url = GM["baseApi"] + "SendCardMsg"
-			elif config["set_1"]["hookMd"] == 3:
 				url = GM["baseApi"] + "SendMingPian"
 				json2 = {
 					"wxid": to_wxid,
 					"msg": f"<?xml version='1.0'?><msg username='{self.myWxMsg['wxid']}' nickname='{self.myWxMsg['nickname']}'/>"
 				}
-			elif config["set_1"]["hookMd"] == 4:
+			elif config["set_1"]["hookMd"] == 2:
 				json2 = {
 					"towxid": to_wxid,
 					"fromwxid": self.myWxMsg["wxid"],
@@ -865,20 +740,10 @@ wxid nickname phonenumber wxcount nation
 			if config["set_9"]["jieXh"] and config["set_9"]["noWx"]:
 				return
 			# 走到了这里就是肯定有发
-			if config["set_1"]["hookMd"] == 2:
+			if config["set_1"]["hookMd"] == 1:
 				url = GM["baseApi"] + "SendTextMsg"
-				msg = msg.replace("\n", "\r")
-				json2 = {
-				    "wxid": wxid,
-				    "msg": msg,
-				}
-				# print("sendTextMsg0.json2", json2)
-			elif config["set_1"]["hookMd"] == 3:
-				url = GM["baseApi"] + "SendTextMsg"
-			elif config["set_1"]["hookMd"] == 4:
+			elif config["set_1"]["hookMd"] == 2:
 				url = GM["baseApi"] + "send_text_msg"
-			elif config["set_1"]["hookMd"] == 1:
-				url = GM["baseApi"] + "send_text"
 			try:
 				data = web.post(url, [], json2)
 				if data.status_code == 200:
@@ -1032,29 +897,17 @@ wxid nickname phonenumber wxcount nation
 			}
 			if config["set_9"]["jieXh"] and config["set_9"]["noWx"]:
 				return
-			if config["set_1"]["hookMd"] == 2:
-				url = GM["baseApi"] + "SendPicMsg"
-				json2 = {
-				    "wxid": wxid,
-				    "picpath": path
-				}
-			elif config["set_1"]["hookMd"] == 3:
+			if config["set_1"]["hookMd"] == 1:
 				url = GM["baseApi"] + "SendImageMsg"
 				json2 = {
 				    "wxid": wxid,
 				    "path": path
 				}
-			elif config["set_1"]["hookMd"] == 4:
+			elif config["set_1"]["hookMd"] == 2:
 				url = GM["baseApi"] + "send_image_msg"
 				json2 = {
 				    "wxid": wxid,
 				    "image_path": path
-				}
-			elif config["set_1"]["hookMd"] == 1:
-				url = GM["baseApi"] + "send_image"
-				json2 = {
-				    "wxid": wxid,
-				    "path": path
 				}
 			try:
 				data = web.post(url, [], json2)

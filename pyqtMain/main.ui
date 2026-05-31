@@ -60,44 +60,18 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
       <string>列表</string>
      </attribute>
-     <widget class="QPushButton" name="clear_btn">
-      <property name="geometry">
-       <rect>
-        <x>540</x>
-        <y>520</y>
-        <width>90</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>清除消息</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_1_shoudong">
-      <property name="geometry">
-       <rect>
-        <x>640</x>
-        <y>520</y>
-        <width>90</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>发送</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="lb_1_fdCount">
       <property name="geometry">
        <rect>
         <x>280</x>
         <y>53</y>
-        <width>31</width>
+        <width>180</width>
         <height>22</height>
        </rect>
       </property>
@@ -112,36 +86,73 @@
        <string notr="true">color:rgb(0,0,123)</string>
       </property>
       <property name="text">
-       <string/>
+       <string>DeepSeek 对话</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_1_start">
+     <widget class="QTextBrowser" name="chat_view">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>41</width>
-        <height>71</height>
+        <x>100</x>
+        <y>90</y>
+        <width>630</width>
+        <height>380</height>
        </rect>
       </property>
-      <property name="text">
-       <string>开始</string>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(247,247,247); border:1px solid rgb(204,204,204); padding:10px;</string>
+      </property>
+      <property name="openExternalLinks">
+       <bool>true</bool>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_1_stop">
+     <widget class="QTextEdit" name="query">
       <property name="geometry">
        <rect>
-        <x>52</x>
-        <y>10</y>
-        <width>41</width>
-        <height>71</height>
+        <x>100</x>
+        <y>480</y>
+        <width>430</width>
+        <height>70</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>-1</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-size:14px; padding:8px;</string>
+      </property>
+      <property name="placeholderText">
+       <string>请输入内容，按 Ctrl+Enter 发送，按 Shift+Enter 换行</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_1_shoudong">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>520</y>
+        <width>90</width>
+        <height>32</height>
        </rect>
       </property>
       <property name="text">
-       <string>停止</string>
+       <string>发送</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="clear_btn">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>520</y>
+        <width>90</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>清除消息</string>
       </property>
      </widget>
     </widget>
@@ -149,71 +160,6 @@
      <attribute name="title">
       <string>设置</string>
      </attribute>
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>121</width>
-        <height>121</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>宋体</family>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color:rgb(244,245,247);</string>
-      </property>
-      <property name="title">
-       <string>微信控制模式</string>
-      </property>
-      <widget class="QRadioButton" name="rdbt_2_1">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>98</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Microsoft YaHei</family>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>模式3-3.9.12.55</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="rdbt_2_7">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>40</y>
-         <width>98</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Microsoft YaHei</family>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>模式4-3.9.12.55</string>
-       </property>
-      </widget>
-     </widget>
      <widget class="QGroupBox" name="groupBox_6">
       <property name="geometry">
        <rect>
@@ -482,50 +428,6 @@
         <string>发封盘数据</string>
        </property>
       </widget>
-      <widget class="QCheckBox" name="ckbx_2_fp2">
-       <property name="geometry">
-        <rect>
-         <x>330</x>
-         <y>87</y>
-         <width>121</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Microsoft YaHei</family>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color:rgb(51,51,90);</string>
-       </property>
-       <property name="text">
-        <string>封盘数据发详细</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="ckbx_2_fp1">
-       <property name="geometry">
-        <rect>
-         <x>210</x>
-         <y>87</y>
-         <width>111</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Microsoft YaHei</family>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color:rgb(51,51,90);</string>
-       </property>
-       <property name="text">
-        <string>封盘数据发统计</string>
-       </property>
-      </widget>
       <widget class="QComboBox" name="cbx_2_6">
        <property name="geometry">
         <rect>
@@ -582,8 +484,8 @@
       <widget class="QLabel" name="label_28">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>230</y>
+         <x>20</x>
+         <y>50</y>
          <width>91</width>
          <height>24</height>
         </rect>
@@ -601,59 +503,11 @@
         <string>连续发送少于</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="ledt_2_wxid_3">
-       <property name="geometry">
-        <rect>
-         <x>90</x>
-         <y>310</y>
-         <width>161</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>9</pointsize>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color:rgb(255,255,255);color:rgb(51,51,90);</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="ckbx_2_buFd">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>350</y>
-         <width>110</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Microsoft YaHei</family>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color:rgb(51,51,90);</string>
-       </property>
-       <property name="text">
-        <string>不发飞单群</string>
-       </property>
-      </widget>
       <widget class="QCheckBox" name="ckbx_2_waitSd">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>200</y>
+         <x>20</x>
+         <y>20</y>
          <width>141</width>
          <height>24</height>
         </rect>
@@ -674,8 +528,8 @@
       <widget class="QLabel" name="label_27">
        <property name="geometry">
         <rect>
-         <x>160</x>
-         <y>230</y>
+         <x>170</x>
+         <y>50</y>
          <width>101</width>
          <height>24</height>
         </rect>
@@ -693,33 +547,11 @@
         <string>/100秒判断</string>
        </property>
       </widget>
-      <widget class="QCheckBox" name="ckbx_2_buJd">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>350</y>
-         <width>110</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Microsoft YaHei</family>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color:rgb(51,51,90);</string>
-       </property>
-       <property name="text">
-        <string>不发接单群</string>
-       </property>
-      </widget>
       <widget class="QLineEdit" name="ledt_2_lsTime">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>230</y>
+         <x>120</x>
+         <y>50</y>
          <width>40</width>
          <height>24</height>
         </rect>
@@ -740,8 +572,8 @@
       <widget class="QLineEdit" name="ledt_2_wTime">
        <property name="geometry">
         <rect>
-         <x>160</x>
-         <y>200</y>
+         <x>170</x>
+         <y>20</y>
          <width>40</width>
          <height>24</height>
         </rect>
@@ -762,8 +594,8 @@
       <widget class="QLabel" name="label_29">
        <property name="geometry">
         <rect>
-         <x>210</x>
-         <y>200</y>
+         <x>220</x>
+         <y>20</y>
          <width>55</width>
          <height>24</height>
         </rect>
@@ -779,28 +611,6 @@
        </property>
        <property name="text">
         <string>/100秒</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_23">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>310</y>
-         <width>55</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Microsoft YaHei</family>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color:rgb(51,51,90);</string>
-       </property>
-       <property name="text">
-        <string>发送文字</string>
        </property>
       </widget>
      </widget>
@@ -944,6 +754,97 @@
        </property>
        <property name="text">
         <string>添加</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="btn_1_start">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>10</y>
+        <width>41</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>开始</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_1_stop">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>10</y>
+        <width>41</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>停止</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>10</y>
+        <width>121</width>
+        <height>121</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>宋体</family>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgb(244,245,247);</string>
+      </property>
+      <property name="title">
+       <string>微信控制模式</string>
+      </property>
+      <widget class="QRadioButton" name="rdbt_2_1">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>98</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei</family>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>模式3-3.9.12.55</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="rdbt_2_7">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>98</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei</family>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>模式4-3.9.12.55</string>
        </property>
       </widget>
      </widget>
