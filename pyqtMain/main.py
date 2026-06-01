@@ -135,11 +135,15 @@ class MainWindow(QMainWindow, wxHandle, deepHandle):
         self.sendWxId = ""
 
     def rcvWxMsgOver(self):
-        for attr in ("json_dict1", "json_dict2", "json_dict3", "json_dict4"):
-            msg = getattr(self, attr, None)
-            if msg:
-                self.handleWxMsg(msg)
-                setattr(self, attr, None)
+        try:
+            for attr in ("json_dict1", "json_dict2", "json_dict3", "json_dict4"):
+                msg = getattr(self, attr, None)
+                if msg:
+                    self.handleWxMsg(msg)
+                    setattr(self, attr, None)
+        except Exception as e:
+            pass
+        
 
     def closeEvent(self, event):
         if not self.openOver:

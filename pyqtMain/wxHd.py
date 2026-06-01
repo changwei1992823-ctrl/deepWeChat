@@ -544,10 +544,6 @@ wxid nickname phonenumber wxcount nation
 					self.cbx_2_2.setCurrentText(config["set_1"]["fdQun"])
 				elif cs2 != "":
 					self.cbx_2_2.setCurrentText(cs2)
-
-				# utils.info("self.wxMsgDic", self.wxMsgDic)
-				# self.agreeFriend()
-				# 先固定到什么这里
 		# except Exception as e:
 		# 	print("getChatList.error", e)
 		# 	if self.tryTime < 4:

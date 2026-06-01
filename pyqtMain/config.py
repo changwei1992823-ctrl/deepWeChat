@@ -89,7 +89,7 @@ config["set_1"] = {
 
 	"noWx": 0,
 
-	"wxHook": 0,
+	"wxHook": 1,
 	"wxHui1": 1,
 	"wxHui2": 1,
 

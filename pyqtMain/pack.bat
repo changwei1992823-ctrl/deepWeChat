@@ -1,1 +1,1 @@
-pyinstaller --clean --win-private-assemblies -F -w main.py -i logo.ico -n WCKJ
+pyinstaller --clean --win-private-assemblies -F -w main.py -i logo.ico -n DSKJ
