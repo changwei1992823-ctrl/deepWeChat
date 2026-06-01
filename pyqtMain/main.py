@@ -51,7 +51,7 @@ class MainWindow(QMainWindow, wxHandle, deepHandle):
         self.inQieHuan = False
         self.needFtp = True
         self.needCkTime = False
-        self.hasLogin = False
+        self.hasLogin = True
 
 
         self.wxQunTab = []
@@ -65,13 +65,14 @@ class MainWindow(QMainWindow, wxHandle, deepHandle):
         self.openTimer()
         webHandleObj.startThread()
 
-        if GM["needLogin"] == False:
-            self.lb_1_8.setText("")
-            self.lb_1_9.setText("")
-            self.hasLogin = True
-        else:
-            self.needCkTime = True
-            self.lb_1_8.setText("软件到期时间:")
+        # if GM["needLogin"] == False:
+        #     self.lb_1_8.setText("")
+        #     self.lb_1_9.setText("")
+        #     self.hasLogin = True
+        # else:
+        #     self.needCkTime = True
+        #     self.lb_1_8.setText("软件到期时间:")
+        self.wxHdInit()
 
         self.openOver = True
 
@@ -131,7 +132,8 @@ class MainWindow(QMainWindow, wxHandle, deepHandle):
     # 子线程调不出 主线程的界面 只能过一层交给你主线程
     def rcvWxMsgOver(self):
         # print("rcvWxMsgOver", self.json_dict)
-        try:
+        # try:
+        if True:
             if self.json_dict1:
                 self.handleWxMsg(self.json_dict1)
                 self.json_dict1 = None
@@ -144,12 +146,12 @@ class MainWindow(QMainWindow, wxHandle, deepHandle):
             if self.json_dict4:
                 self.handleWxMsg(self.json_dict4)
                 self.json_dict4 = None
-        except Exception as e:
-            self.json_dict1 = None
-            self.json_dict2 = None
-            self.json_dict3 = None
-            self.json_dict4 = None
-            utils.info("---rcvWxMsgOver.err---"+str(e))
+        # except Exception as e:
+        #     self.json_dict1 = None
+        #     self.json_dict2 = None
+        #     self.json_dict3 = None
+        #     self.json_dict4 = None
+        #     utils.info("---rcvWxMsgOver.err---"+str(e))
         
 
     def closeEvent(self, event):

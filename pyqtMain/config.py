@@ -93,6 +93,8 @@ config["set_1"] = {
 	"fdQyq": "",  # 飞单企业群
 	"buJd": 0,
 	"buFd": 0,
+
+	"noWx": 0,
 }
 
 config["set_2"] = {

@@ -55,7 +55,7 @@ class wxHandle(Ui_MainWindow):
 		self.withWarn = True
 
 	def replayWxHd(self):
-		if config["set_9"]["jieXh"] and config["set_9"]["noWx"]:
+		if config["set_1"]["noWx"]:
 			self.inHandleWx = False
 			self.canUseWx = True
 			return
@@ -415,7 +415,8 @@ wxid nickname phonenumber wxcount nation
 		elif config["set_1"]["hookMd"] == 2:
 			json2 = None
 			url = GM["baseApi"] + "get_frien_lists"
-		try:
+		# try:
+		if True:
 			# if True:
 			# print("url", url)
 			self.inHandleWx = False
@@ -455,18 +456,9 @@ wxid nickname phonenumber wxcount nation
 
 				# print(wxQunTab)
 				self.wxQunTab = wxQunTab
-				self.rcdRoleMsg()
 				
 				self.cbx_2_1.clear()
 				self.cbx_2_2.clear()
-
-				self.cbx_2_3.clear()
-				self.cbx_2_4.clear()
-				self.cbx_2_5.clear()
-
-				self.cbx_2_3.addItem("")
-				self.cbx_2_4.addItem("")
-				self.cbx_2_5.addItem("")
 
 				self.inHandleWx = False
 				cs1 = ""
@@ -478,10 +470,6 @@ wxid nickname phonenumber wxcount nation
 						# print("mStr", mStr)
 						self.cbx_2_1.addItem(mStr)
 						self.cbx_2_2.addItem(mStr)
-
-						self.cbx_2_3.addItem(mStr)
-						self.cbx_2_4.addItem(mStr)
-						self.cbx_2_5.addItem(mStr)
 
 						if cs1 == "":
 							if "接单" in mStr:
@@ -508,34 +496,19 @@ wxid nickname phonenumber wxcount nation
 				elif cs2 != "":
 					self.cbx_2_2.setCurrentText(cs2)
 
-				if hasattr(self, "cbx_2_3_curText") and self.cbx_2_3_curText != "":
-					self.cbx_2_3.setCurrentText(self.cbx_2_3_curText)
-				elif config["set_1"]["jdQun2"] != "":
-					self.cbx_2_3.setCurrentText(config["set_1"]["jdQun2"])
-
-				if hasattr(self, "cbx_2_4_curText") and self.cbx_2_4_curText != "":
-					self.cbx_2_4.setCurrentText(self.cbx_2_4_curText)
-				elif config["set_1"]["jdQun3"] != "":
-					self.cbx_2_4.setCurrentText(config["set_1"]["jdQun3"])
-
-				if hasattr(self, "cbx_2_5_curText") and self.cbx_2_5_curText != "":
-					self.cbx_2_5.setCurrentText(self.cbx_2_5_curText)
-				elif config["set_1"]["jdQun4"] != "":
-					self.cbx_2_5.setCurrentText(config["set_1"]["jdQun4"])
-
 				# utils.info("self.wxMsgDic", self.wxMsgDic)
 				# self.agreeFriend()
 				# 先固定到什么这里
-		except Exception as e:
-			print("getChatList.error", e)
-			if self.tryTime < 4:
-				self.tryTime += 1
-				if config["set_1"]["hookMd"] == 1:
-					time.sleep(0.4)
-					self.startMyShou()
-				elif config["set_1"]["hookMd"] == 2:
-					time.sleep(0.4)
-					self.startMyShou("ConsoleApp4.exe")
+		# except Exception as e:
+		# 	print("getChatList.error", e)
+		# 	if self.tryTime < 4:
+		# 		self.tryTime += 1
+		# 		if config["set_1"]["hookMd"] == 1:
+		# 			time.sleep(0.4)
+		# 			self.startMyShou()
+		# 		elif config["set_1"]["hookMd"] == 2:
+		# 			time.sleep(0.4)
+		# 			self.startMyShou("ConsoleApp4.exe")
 
 	# 我自己主动发送的心跳 用来证明活着 备用
 	def getHeart(self):
@@ -556,39 +529,7 @@ wxid nickname phonenumber wxcount nation
 			self.sendMingPian()
 		else:
 			self.tuiMingPian()
-		if config["set_1"]["mojd"] and self.cbx_2_1.currentIndex() > -1:
-			wxid1 = self.getJieDanQun1()
-			wxidTab = [wxid1]
-			# 接单群2
-			if self.cbx_2_3.currentIndex() > 0:
-				wxid2 = self.wxQunTab[self.cbx_2_3.currentIndex() - 1]["wxid"]
-				if wxid2 not in wxidTab:
-					wxidTab.append(wxid2)
-					if withWo:
-						self.sendTextMsg(text, wxid2, "gongJiDianWo")
-						self.sendMingPian(wxid2)
-					else:
-						self.tuiMingPian()
-			# 接单群3
-			if self.cbx_2_4.currentIndex() > 0:
-				wxid3 = self.wxQunTab[self.cbx_2_4.currentIndex() - 1]["wxid"]
-				if wxid3 not in wxidTab:
-					wxidTab.append(wxid3)
-					if withWo:
-						self.sendTextMsg(text, wxid3, "gongJiDianWo")
-						self.sendMingPian(wxid3)
-					else:
-						self.tuiMingPian()
-			# 接单群4
-			if self.cbx_2_5.currentIndex() > 0:
-				wxid4 = self.wxQunTab[self.cbx_2_5.currentIndex() - 1]["wxid"]
-				if wxid4 not in wxidTab:
-					wxidTab.append(wxid4)
-					if withWo:
-						self.sendTextMsg(text, wxid4, "gongJiDianWo")
-						self.sendMingPian(wxid4)
-					else:
-						self.tuiMingPian()
+
 	# 发送维护提示
 	def sendWhTip(self):
 		if config["set_1"]["buJd"]:
@@ -597,27 +538,6 @@ wxid nickname phonenumber wxcount nation
 		if config["whTip"].strip() != "":
 			text = config["whTip"]
 			self.sendTextMsg(text)
-			if config["set_1"]["mojd"] and self.cbx_2_1.currentIndex() > -1:
-				wxid1 = self.getJieDanQun1()
-				wxidTab = [wxid1]
-				# 接单群2
-				if self.cbx_2_3.currentIndex() > 0:
-					wxid2 = self.wxQunTab[self.cbx_2_3.currentIndex() - 1]["wxid"]
-					if wxid2 not in wxidTab:
-						wxidTab.append(wxid2)
-						self.sendTextMsg(text, wxid2)
-				# 接单群3
-				if self.cbx_2_4.currentIndex() > 0:
-					wxid3 = self.wxQunTab[self.cbx_2_4.currentIndex() - 1]["wxid"]
-					if wxid3 not in wxidTab:
-						wxidTab.append(wxid3)
-						self.sendTextMsg(text, wxid3)
-				# 接单群4
-				if self.cbx_2_5.currentIndex() > 0:
-					wxid4 = self.wxQunTab[self.cbx_2_5.currentIndex() - 1]["wxid"]
-					if wxid4 not in wxidTab:
-						wxidTab.append(wxid4)
-						self.sendTextMsg(text, wxid4)
 
 	def tuiMingPian(self, to_wxid = ""):
 		if to_wxid == "":
@@ -737,7 +657,7 @@ wxid nickname phonenumber wxcount nation
 				"wxid": wxid,
 				"msg": msg
 			}
-			if config["set_9"]["jieXh"] and config["set_9"]["noWx"]:
+			if config["set_1"]["noWx"]:
 				return
 			# 走到了这里就是肯定有发
 			if config["set_1"]["hookMd"] == 1:
@@ -895,7 +815,7 @@ wxid nickname phonenumber wxcount nation
 				"wxid": wxid,
 				"imagepath": path
 			}
-			if config["set_9"]["jieXh"] and config["set_9"]["noWx"]:
+			if config["set_1"]["noWx"]:
 				return
 			if config["set_1"]["hookMd"] == 1:
 				url = GM["baseApi"] + "SendImageMsg"
@@ -928,35 +848,25 @@ wxid nickname phonenumber wxcount nation
 		path = self.createResult()
 		if path:
 			self.sendImageMsg(path)
-		if config["set_1"]["mojd"] and self.cbx_2_1.currentIndex() > -1:
-			wxid1 = self.getJieDanQun1()
-			wxidTab = [wxid1]
-			# 接单群2
-			if self.cbx_2_3.currentIndex() > 0:
-				wxid2 = self.wxQunTab[self.cbx_2_3.currentIndex() - 1]["wxid"]
-				if wxid2 not in wxidTab:
-					wxidTab.append(wxid2)
-					path = self.createResult(2)
-					if path:
-						self.sendImageMsg(path, wxid2)
-			# 接单群3
-			if self.cbx_2_4.currentIndex() > 0:
-				wxid3 = self.wxQunTab[self.cbx_2_4.currentIndex() - 1]["wxid"]
-				if wxid3 not in wxidTab:
-					wxidTab.append(wxid3)
-					path = self.createResult(3)
-					if path:
-						self.sendImageMsg(path, wxid3)
-			# 接单群4
-			if self.cbx_2_5.currentIndex() > 0:
-				wxid4 = self.wxQunTab[self.cbx_2_5.currentIndex() - 1]["wxid"]
-				if wxid4 not in wxidTab:
-					wxidTab.append(wxid4)
-					path = self.createResult(4)
-					if path:
-						self.sendImageMsg(path, wxid4)
 		self.maxPnum = 0
 		return path
+
+	def _wxid_from_combo(self, combo):
+		if combo is None or combo.currentIndex() < 0:
+			return ""
+		text = combo.currentText().strip()
+		if "|" in text:
+			return text.split("|", 1)[1].strip()
+		idx = combo.currentIndex()
+		if hasattr(self, "wxQunTab") and 0 <= idx < len(self.wxQunTab):
+			return self.wxQunTab[idx].get("wxid", "") or ""
+		return ""
+
+	def getJieDanQun1(self):
+		return self._wxid_from_combo(self.cbx_2_1)
+
+	def getFdQun1(self):
+		return self._wxid_from_combo(self.cbx_2_2)
 
 	def sendResultImagePerson(self):
 		path = self.createResult()
