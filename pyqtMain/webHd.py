@@ -49,6 +49,132 @@ import stopThreading
 }
 """
 
+
+def _str_field(obj, default=""):
+	if obj is None:
+		return default
+	if isinstance(obj, dict):
+		return (obj.get("String") or obj.get("string") or default).strip()
+	return str(obj).strip()
+
+
+def _normalize_hook_message(raw):
+	"""将各 Hook 回调格式统一为 handleWxMsg 可用的字段。"""
+	if not raw or not isinstance(raw, dict):
+		return None
+
+	hook_md = int(config["set_1"].get("hookMd", 1))
+
+	if "bsMsg" in raw:
+		out = dict(raw)
+		out["msgtype"] = out.get("msgtype", 1)
+		return out
+
+	if hook_md == 1:
+		if "data" in raw and isinstance(raw["data"], dict):
+			zero = raw["data"]
+			out = {
+				"msgtype": zero.get("type", 1),
+				"wxid": zero.get("session", ""),
+				"content": zero.get("content", ""),
+				"sendorrecv": str(raw.get("sendorrecv", "2")),
+			}
+			qy = GM.get("qy", "")
+			if qy and qy in out["wxid"]:
+				out["bizchat_id"] = out["wxid"]
+			return out
+
+		if "content" in raw:
+			out = dict(raw)
+			out.setdefault("msgtype", 1)
+			room = (raw.get("RoomName") or raw.get("room_wxid") or "").strip()
+			if room:
+				out["room_wxid"] = room
+			wxid = (raw.get("wxid") or "").strip()
+			if "@chatroom" in wxid and not out.get("room_wxid"):
+				out["room_wxid"] = wxid
+			return out
+
+		if "signature" in raw:
+			out = dict(raw)
+			out.setdefault("msgtype", 1)
+			if "bizchat_id" in raw["signature"]:
+				match = re.search(r"<bizchat_id>(.*?)</bizchat_id>", raw["signature"])
+				if match:
+					out["bizchat_id"] = match.group(1)
+					return out
+			return None
+
+		return None
+
+	if hook_md == 2:
+		# 模式2 常见三种回调：msglist / 微信协议字段 / 扁平 JSON(RoomName+content)
+		if "msglist" in raw and raw.get("msglist"):
+			zero = raw["msglist"][0]
+			if not ("msgtype" in zero and "fromid" in zero and "msg" in zero):
+				return None
+			msgtype = int(zero.get("msgtype", 1))
+			if msgtype not in (1, 37):
+				return None
+			out = {
+				"msgtype": msgtype,
+				"wxid": zero.get("fromid", ""),
+				"content": zero.get("msg", ""),
+				"sendorrecv": str(raw.get("sendorrecv", "2")),
+			}
+			msgsource = zero.get("msgsource") or ""
+			if "bizchat_id" in msgsource:
+				match = re.search(r"<bizchat_id>(.*?)</bizchat_id>", msgsource)
+				if match:
+					out["bizchat_id"] = match.group(1)
+			room = (
+				raw.get("RoomName") or raw.get("room_wxid")
+				or zero.get("toid") or ""
+			).strip()
+			if room:
+				out["room_wxid"] = room
+			elif "@chatroom" in out["wxid"]:
+				out["room_wxid"] = out["wxid"]
+			return out
+
+		if "MsgType" in raw or "FromUserName" in raw:
+			msgtype = int(raw.get("MsgType", raw.get("msgtype", 1)))
+			if msgtype not in (1, 37):
+				return None
+			out = {
+				"msgtype": msgtype,
+				"wxid": _str_field(raw.get("FromUserName")),
+				"content": _str_field(raw.get("Content")),
+				"sendorrecv": str(raw.get("sendorrecv", "2")),
+			}
+			room = (raw.get("RoomName") or raw.get("room_wxid") or "").strip()
+			if room:
+				out["room_wxid"] = room
+			elif "@chatroom" in out["wxid"]:
+				out["room_wxid"] = out["wxid"]
+			msg_source = _str_field(raw.get("MsgSource"))
+			if "bizchat_id" in msg_source:
+				match = re.search(r"<bizchat_id>(.*?)</bizchat_id>", msg_source)
+				if match:
+					out["bizchat_id"] = match.group(1)
+			return out
+
+		if "content" in raw:
+			out = dict(raw)
+			out.setdefault("msgtype", 1)
+			room = (raw.get("RoomName") or raw.get("room_wxid") or "").strip()
+			if room:
+				out["room_wxid"] = room
+			wxid = (raw.get("wxid") or "").strip()
+			if "@chatroom" in wxid and not out.get("room_wxid"):
+				out["room_wxid"] = wxid
+			return out
+
+		return None
+
+	return None
+
+
 def application(environ, start_response):
 	start_response('200 OK', [('Content-Type', 'application/json')])
 	print("wocao.application")
@@ -75,38 +201,9 @@ def application(environ, start_response):
 		json_dict = json.loads(json_str) #（注意：key值必须双引号）
 		# print("json_dict", json_dict)
 		# return [b'rtn.welcome', ]
-		if "bsMsg" in json_dict:
-			bsMsg = json_dict["bsMsg"]
-			json_dict["msgtype"] = 1
-			# json2["wxid"] = zero
-			# json2["content"] = zero["Content"]["String"]
-		else:
-			# 消息
-			if config["set_1"]["hookMd"] == 1:
-				if "signature" in json_dict:
-					if "bizchat_id" in json_dict["signature"]:
-						match = re.search(r'<bizchat_id>(.*?)</bizchat_id>', json_dict["signature"])
-						if match:
-							bizchat_id_content = match.group(1)
-							json_dict["bizchat_id"] = bizchat_id_content
-						else:
-							return [b'welcome', ]
-			elif config["set_1"]["hookMd"] == 2:
-				json2 = {}
-				zero = json_dict
-				json2["msgtype"] = zero["MsgType"]
-				json2["wxid"] = zero["FromUserName"]["String"]
-				json2["content"] = zero["Content"]["String"]
-				# json2["msgsource"] = zero["MsgSource"]
-				if "bizchat_id" in zero["MsgSource"]:
-					match = re.search(r'<bizchat_id>(.*?)</bizchat_id>', zero["MsgSource"])
-					if match:
-						bizchat_id_content = match.group(1)
-						json2["bizchat_id"] = bizchat_id_content
-					else:
-						return [b'welcome', ]
-
-				json_dict = json2
+		json_dict = _normalize_hook_message(json_dict)
+		if json_dict is None:
+			return [b'welcome', ]
 
 		if "content" not in json_dict:
 			return [b'welcome', ]
@@ -128,7 +225,9 @@ def application(environ, start_response):
 		this.finish.emit()
 		
 	except Exception as e:
-		pass
+		print("webHd.application.err", e)
+		import traceback
+		traceback.print_exc()
 	return [b'{"state":"ok"}', ]
 
 class webHandle(object):
@@ -149,12 +248,6 @@ class webHandle(object):
 			self.openServer4()
 		elif config["set_1"]["hookMd"] == 1:
 			self.openServer3()
-
-	def openServer2(self):
-		port = 8898
-		httpd = make_server("0.0.0.0", port , application)
-		print("serving http on port {0}...".format(str(port)))
-		httpd.serve_forever()
 
 	def openServer3(self):
 		print("openServer3------")

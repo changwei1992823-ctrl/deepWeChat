@@ -32,19 +32,20 @@ class deepHandle(object):
         self.deep_history = []
         self._deep_loading_history = False
         self._wx_auto_reply = False
-        self._deep_hook_mute_until = 0
+        self._deep_hook_echo_until = 0
         self._deep_last_bot_reply = ""
         self.history_file = os.path.join(CUR_DIR, "chat_history.json")
         if hasattr(self, "ledt_2_deepseek_key"):
             self.ledt_2_deepseek_key.setText(saved_key or "")
 
         self.chat_view.setOpenExternalLinks(True)
-        self.chat_view.setStyleSheet(
-            "QTextBrowser { background-color:#F7F7F7; border:1px solid #CCCCCC; padding:10px; }"
+        self.chat_view.setLineWrapMode(self.chat_view.WidgetWidth)
+        self.chat_view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.chat_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.chat_view.document().setDefaultStyleSheet(
+            "body, table, td { word-wrap: break-word; word-break: break-word; }"
         )
         self.query.installEventFilter(self)
-        self.tab_1.installEventFilter(self)
-        self._relayout_tab1()
 
         self.clear_btn.clicked.connect(self.clear_deep_history)
         if hasattr(self, "btn_2_change_deep_key"):
@@ -116,8 +117,9 @@ class deepHandle(object):
             return True
         if "@chatroom" in (reply_wxid or ""):
             return True
-        room = (json_dict.get("room_wxid") or "").strip()
-        return bool(room and "@chatroom" in room)
+        if (json_dict.get("room_wxid") or json_dict.get("RoomName") or "").strip():
+            return True
+        return False
 
     def on_change_deepseek_key(self):
         key = self.ledt_2_deepseek_key.text().strip()
@@ -130,24 +132,6 @@ class deepHandle(object):
         self.lb_1_0.setText("DeepSeek Key 已保存到配置")
         QMessageBox.information(self, "提示", "API Key 已写入 config[set_1][apiKey] 并生效", QMessageBox.Ok)
 
-    def _relayout_tab1(self):
-        m = 10
-        gap = 8
-        btn_w = 90
-        header_h = 28
-        footer_h = 76
-        w = self.tab_1.width()
-        h = self.tab_1.height()
-        if w < 200 or h < 200:
-            return
-        self.lb_1_fdCount.setGeometry(m, m, w - 2 * m - btn_w - gap, header_h)
-        self.clear_btn.setGeometry(w - m - btn_w, m, btn_w, header_h)
-        top = m + header_h + gap
-        foot_top = h - m - footer_h
-        self.chat_view.setGeometry(m, top, w - 2 * m, foot_top - top - gap)
-        self.query.setGeometry(m, foot_top, w - 2 * m - btn_w - gap, footer_h)
-        self.btn_1_shoudong.setGeometry(w - m - btn_w, foot_top + 10, btn_w, 32)
-
     def _make_bubble(self, sender, text):
         safe_text = text.replace("\n", "<br/>")
         if sender == "DeepSeek":
@@ -156,7 +140,8 @@ class deepHandle(object):
             bg, title_color, title = "#DCF8C6", "#2E7D32", sender
         return (
             '<table cellspacing="0" cellpadding="0" border="0" style="margin:6px 0;">'
-            '<tr><td bgcolor="' + bg + '" style="padding:10px 14px; color:#1a1a1a;">'
+            '<tr><td bgcolor="' + bg + '" style="padding:10px 14px; color:#1a1a1a;'
+            ' word-wrap:break-word; word-break:break-word;">'
             '<b><font color="' + title_color + '">' + title + '</font></b><br/>'
             + safe_text +
             '</td></tr></table>'
@@ -201,13 +186,24 @@ class deepHandle(object):
         return wxids
 
     def _resolve_reply_wxid(self, json_dict):
-        if json_dict.get("bizchat_id"):
-            return json_dict["bizchat_id"]
-        room = (json_dict.get("room_wxid") or "").strip()
+        room = (json_dict.get("room_wxid") or json_dict.get("RoomName") or "").strip()
         if room:
             return room
+        if json_dict.get("bizchat_id"):
+            return json_dict["bizchat_id"]
         wxid = (json_dict.get("wxid") or "").strip()
+        if "@chatroom" in wxid:
+            return wxid
         return wxid
+
+    def _is_monitor_group(self, reply_wxid):
+        target = (reply_wxid or "").strip()
+        if not target:
+            return False
+        for gid in self._get_monitor_group_wxids():
+            if target == (gid or "").strip():
+                return True
+        return False
 
     def init_ignore_list_ui(self):
         if not hasattr(self, "tableWidget_2"):
@@ -312,13 +308,10 @@ class deepHandle(object):
             dataHandleObj.updateConfig("set_3", config["set_3"])
             self.refresh_ignore_list()
 
-    def _is_hook_muted(self):
-        return time.time() < getattr(self, "_deep_hook_mute_until", 0)
-
-    def _mute_wx_hook(self, seconds=4):
-        self._deep_hook_mute_until = time.time() + seconds
-
     def _is_bot_echo(self, text):
+        """抑制刚发回微信后 Hook 推回的相同内容，不拦截正常群消息。"""
+        if time.time() > getattr(self, "_deep_hook_echo_until", 0):
+            return False
         last = (getattr(self, "_deep_last_bot_reply", "") or "").strip()
         cur = (text or "").strip()
         if not last or not cur:
@@ -330,6 +323,14 @@ class deepHandle(object):
         if len(last) >= 30 and last in cur:
             return True
         return False
+
+    def _send_wx_reply(self, response_text, reply_wxid):
+        """仅微信 Hook 入站消息回发到群/个人；对话框手动发送不走此函数。"""
+        if not hasattr(self, "sendTextMsg0") or not reply_wxid or not response_text:
+            return
+        self._deep_last_bot_reply = response_text
+        self._deep_hook_echo_until = time.time() + 8
+        self.sendTextMsg0(response_text, reply_wxid)
 
     def _sender_label(self, json_dict, nickname, reply_wxid):
         if nickname:
@@ -476,15 +477,9 @@ class deepHandle(object):
         self.append_deep_message("DeepSeek", response_text)
         self.lb_1_0.setText("")
 
-        if getattr(self, "canUseWx", False) and hasattr(self, "sendTextMsg0"):
-            self.sendTextMsg0(response_text)
-
     def handleWxMsg(self, json_dict):
         if not self._wx_auto_reply:
             return
-        if self._is_hook_muted():
-            return
-
         msgtype = json_dict.get("msgtype")
         if msgtype not in (1, "1"):
             return
@@ -501,8 +496,7 @@ class deepHandle(object):
         if is_group:
             if int(config["set_1"].get("wxHui1", 1)) != 1:
                 return
-            monitor_groups = self._get_monitor_group_wxids()
-            if reply_wxid not in monitor_groups:
+            if not self._is_monitor_group(reply_wxid):
                 return
         else:
             if int(config["set_1"].get("wxHui2", 1)) != 1:
@@ -528,10 +522,7 @@ class deepHandle(object):
         self.append_deep_message("DeepSeek", response_text)
         self.lb_1_0.setText("")
 
-        if getattr(self, "canUseWx", False) and hasattr(self, "sendTextMsg0"):
-            self._deep_last_bot_reply = response_text
-            self._mute_wx_hook(5)
-            self.sendTextMsg0(response_text, reply_wxid)
+        self._send_wx_reply(response_text, reply_wxid)
 
     def save_deep_history(self):
         try:
@@ -561,9 +552,6 @@ class deepHandle(object):
             self._deep_loading_history = False
 
     def eventFilter(self, watched, event):
-        if hasattr(self, "tab_1") and watched is self.tab_1 and event.type() == QEvent.Resize:
-            self._relayout_tab1()
-            return False
         if hasattr(self, "query") and watched is self.query and event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Return and event.modifiers() == Qt.ControlModifier:
                 self.on_deep_send()

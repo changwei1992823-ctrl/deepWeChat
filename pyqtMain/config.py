@@ -94,7 +94,7 @@ config["set_1"] = {
 	"wxHui2": 1,
 
 
-	"apiKey": "sk-a95ac8deec7b47439367f6bd57163ec6"
+	"apiKey": "sk-a95acxxxxx这里填入你的key 可以去 https://platform.deepseek.com/api_keys 申请"
 }
 
 config["set_2"] = {
@@ -110,10 +110,10 @@ config["set_3"] = []
 config["qy_qun"] = []
 
 config["setRead"] = [
-	# "pl_1314", "pl_fei1314", "pl_wanfa", "pl_ck", "xian_e", "set_ot", "pl_dl", "sz_fw", "machine",
 	"qy_qun",
 	"set_1",
 	"set_3",
+	"more",
 ]
 
 
