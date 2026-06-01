@@ -1,6 +1,8 @@
 # deepWeChat
 
-不用去腾讯那里申请注册什么，微信登录电脑就可以直接使用，直接开源给大家学习使用。
+开源一个 Python 项目，让大家可以直接通过微信 + 自己申请的 DeepSeek 用微信聊天。
+
+不用去腾讯那里申请注册什么，微信登录电脑就可以直接用，让好友直接问你问题、由 AI 回答，开源给大家学习使用。
 
 目前演示所用的微信版本是 **3.9.12.55**。如果找不到可以去 [wechat-windows-versions](https://github.com/tom-snow/wechat-windows-versions) 下载。
 
