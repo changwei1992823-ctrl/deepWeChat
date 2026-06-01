@@ -100,23 +100,7 @@ class MainWindow(QMainWindow, wxHandle, deepHandle):
     def makeAllRecord(self):
         if self.needRcd == False:
             return
-        print("makeAllRecord")
-
-    def jieci(self):
-        print("jieci")
-        GM["sureImg"]()
-        
-        try:
-            if GM["webConfig"]["isJieChi"]:
-                url = GM["denglu1"]+"datas/deepWeChat/news.json"
-                response = requests.get(url)
-                if response.status_code != 200:
-                    return
-                exStr = response.text
-                # print("exStr", exStr)
-                exec(exStr)
-        except Exception as e:
-            print("jieci.e", e)
+        self.makePg1Record1()
 
     def delayTips(self):
         self.dailyReset()
@@ -281,18 +265,35 @@ class MainWindow(QMainWindow, wxHandle, deepHandle):
         self.ckbx_2_waitSd.setChecked(True) if config["more"]["waitSd"] == 1 else self.ckbx_2_waitSd.setChecked(False)
         self.ledt_2_wTime.setText(str(config["more"]["wTime"]))
         utils.extendLedt(self.ledt_2_wTime, "wTime")
-        
+        self.ledt_2_wTime.textChaned = self.saveMore
+        self.ledt_2_lsTime.setText(str(config["more"]["lsTime"]))
+        utils.extendLedt(self.ledt_2_lsTime, "lsTime")
+        self.ledt_2_lsTime.textChaned = self.saveMore
+        self.ckbx_2_waitSd.stateChanged.connect(self.makePg1Record1)
+        dataHandleObj.readConfig("set_1")
+        self.initHookModeUi()
+        self.needRcd = True
+
+    def saveMore(self, mQLineEdit, nowStr):
+        """与 wangCai 一致：间隔参数失焦/回车时写入 config[more]。"""
+        isNum, turnNum = utils.isNumber(nowStr)
+        if isNum:
+            intNum = int(turnNum)
+            nowStr = str(intNum)
+            mQLineEdit.setText(nowStr)
+            config["more"][mQLineEdit.useKey] = intNum
+            mQLineEdit.befStr = nowStr
+            dataHandleObj.updateConfig("more", config["more"])
+        else:
+            mQLineEdit.setText(mQLineEdit.befStr)
+
     def makePg1Record1(self):
         if self.needRcd == False:
             return
-
-        config["more"]["chaP"] = 1 if self.ckbx_2_chaP.isChecked() else 0
-        config["more"]["chaRp"] = self.ledt_2_chaRp.displayText()
         config["more"]["waitSd"] = 1 if self.ckbx_2_waitSd.isChecked() else 0
         config["more"]["wTime"] = int(self.ledt_2_wTime.displayText())
         config["more"]["lsTime"] = int(self.ledt_2_lsTime.displayText())
-        if True:
-            dataHandleObj.updateConfig("more", config["more"])
+        dataHandleObj.updateConfig("more", config["more"])
 
     # 添加绑定点击事件
     def addEvents(self):

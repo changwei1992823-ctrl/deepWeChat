@@ -116,19 +116,6 @@ class dataHandle(object):
 		print("updateConfig.mStr", mStr)
 		# utils.info("updateConfig:\n", mStr)
 		query.exec_(mStr)
-		if key in self.needSaveDic:
-			key_what = self.needSaveDic[key]
-			value2 = value
-			if "'" in value2:
-				value2 = value2.replace("'", "").replace("'", "")
-			if '"' in value2:
-				value2 = value2.replace('"', "").replace('"', "")
-			try:
-				value2 = value2.encode().decode('unicode_escape')
-				dic = {"m_type": 5, "do_what": "修改:"+key_what+"=>"+value2}
-				self.addRizhi(dic)
-			except Exception as e:
-				pass
 			
 
 	def saveConfig(self, key, value):

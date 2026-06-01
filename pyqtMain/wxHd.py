@@ -13,6 +13,7 @@ import win32gui, win32api, win32con
 import requests
 
 from config import *
+from dataHd import dataHandleObj
 
 
 web = requests.session()
@@ -37,15 +38,63 @@ class wxHandle(Ui_MainWindow):
 		# self.createResult()
 	
 
+	def apply_hook_mode_urls(self, hook_md=None):
+		"""按 hookMd 设置微信 API 地址（与 webHd.openServer 端口对应）。"""
+		if hook_md is None:
+			hook_md = int(config["set_1"].get("hookMd", 1))
+		if hook_md == 2:
+			GM["sureUrl"] = GM["sureUrl4"]
+			GM["baseApi"] = GM["baseApi4"]
+		else:
+			GM["sureUrl"] = GM["sureUrl3"]
+			GM["baseApi"] = GM["baseApi3"]
+
+	def initHookModeUi(self):
+		"""启动时从 config 同步 groupBox_2 单选状态。"""
+		if not hasattr(self, "rdbt_2_1"):
+			return
+		hook_md = int(config["set_1"].get("hookMd", 1))
+		if hook_md not in (1, 2):
+			hook_md = 1
+			config["set_1"]["hookMd"] = hook_md
+		self._hook_mode_block = True
+		self.rdbt_2_1.setChecked(hook_md == 1)
+		self.rdbt_2_2.setChecked(hook_md == 2)
+		self._hook_mode_block = False
+		if not getattr(self, "_hook_mode_inited", False):
+			self.rdbt_2_1.toggled.connect(self.on_hook_mode_changed)
+			self.rdbt_2_2.toggled.connect(self.on_hook_mode_changed)
+			self._hook_mode_inited = True
+
+	def on_hook_mode_changed(self, _checked=False):
+		if getattr(self, "_hook_mode_block", False):
+			return
+		hook_md = 2 if self.rdbt_2_2.isChecked() else 1
+		bef = int(config["set_1"].get("hookMd", 1))
+		if hook_md == bef:
+			return
+		reply = QMessageBox.information(
+			self,
+			"切换控制模式",
+			"更换控制模式需要重启软件！现在更换？",
+			QMessageBox.Yes,
+			QMessageBox.Yes,
+		)
+		if reply != QMessageBox.Yes:
+			self._hook_mode_block = True
+			self.rdbt_2_1.setChecked(bef == 1)
+			self.rdbt_2_2.setChecked(bef == 2)
+			self._hook_mode_block = False
+			return
+		config["set_1"]["hookMd"] = hook_md
+		dataHandleObj.updateConfig("set_1", config["set_1"])
+		self.inQieHuan = True
+		self.close()
+
 	# 这个要等到界面出现才能执行
 	def wxHdInit(self):
 		print("hookMd", config["set_1"]["hookMd"])
-		if config["set_1"]["hookMd"] == 1:
-			GM["sureUrl"] = GM["sureUrl3"]
-			GM["baseApi"] = GM["baseApi3"]
-		elif config["set_1"]["hookMd"] == 2:
-			GM["sureUrl"] = GM["sureUrl4"]
-			GM["baseApi"] = GM["baseApi4"]
+		self.apply_hook_mode_urls()
 		# self.replayClean()
 		self.withWarn = False
 		# self.lb_9_1.setReadOnly(True)

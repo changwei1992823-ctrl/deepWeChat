@@ -6,7 +6,9 @@ import json
 import time
 
 from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
+from PyQt5.QtWidgets import (
+    QMainWindow, QApplication, QMessageBox, QAbstractItemView, QTableWidgetItem,
+)
 
 from common_init import *
 from deepseek_client import DeepSeekClient
@@ -24,7 +26,7 @@ class deepHandle(object):
     """DeepSeek 聊天与微信消息自动回复"""
 
     def deepInit(self):
-        self.deep_key_file = os.path.join(CUR_DIR, "deepseek_key.json")
+        dataHandleObj.readConfig("set_1")
         saved_key = self._load_deepseek_key()
         self.deep_client = DeepSeekClient(api_key=saved_key)
         self.deep_history = []
@@ -33,8 +35,8 @@ class deepHandle(object):
         self._deep_hook_mute_until = 0
         self._deep_last_bot_reply = ""
         self.history_file = os.path.join(CUR_DIR, "chat_history.json")
-        if saved_key and hasattr(self, "ledt_2_deepseek_key"):
-            self.ledt_2_deepseek_key.setText(saved_key)
+        if hasattr(self, "ledt_2_deepseek_key"):
+            self.ledt_2_deepseek_key.setText(saved_key or "")
 
         self.chat_view.setOpenExternalLinks(True)
         self.chat_view.setStyleSheet(
@@ -48,32 +50,74 @@ class deepHandle(object):
         if hasattr(self, "btn_2_change_deep_key"):
             self.btn_2_change_deep_key.clicked.connect(self.on_change_deepseek_key)
         self.btn_1_shoudong.clicked.connect(self.on_deep_send)
-        self.btn_1_start.clicked.connect(self.on_deep_start)
-        self.btn_1_stop.clicked.connect(self.on_deep_stop)
+        if hasattr(self, "ckbx_2_wxHook"):
+            self.ckbx_2_wxHook.stateChanged.connect(self.on_wx_hook_changed)
+        if hasattr(self, "ckbx_2_hui1"):
+            self.ckbx_2_hui1.stateChanged.connect(self.on_set_1_hui_changed)
+        if hasattr(self, "ckbx_2_hui2"):
+            self.ckbx_2_hui2.stateChanged.connect(self.on_set_1_hui_changed)
         if hasattr(self, "btn_2_shuaxin"):
             self.btn_2_shuaxin.clicked.connect(self.updateGroupList)
 
+        self.init_ignore_list_ui()
+        self._apply_set_1_checkboxes_from_config()
         self.load_deep_history()
         self._update_deep_status()
 
     def _load_deepseek_key(self):
-        if os.path.exists(self.deep_key_file):
-            try:
-                with open(self.deep_key_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                key = (data.get("api_key") or "").strip()
-                if key:
-                    return key
-            except Exception:
-                pass
-        return os.environ.get("DEEPSEEK_API_KEY", "").strip() or None
+        key = (config.get("set_1", {}).get("apiKey") or "").strip()
+        return key or None
 
     def _save_deepseek_key(self, key):
+        if "set_1" not in config:
+            config["set_1"] = {}
+        config["set_1"]["apiKey"] = key
         try:
-            with open(self.deep_key_file, "w", encoding="utf-8") as f:
-                json.dump({"api_key": key}, f, ensure_ascii=False, indent=2)
+            dataHandleObj.updateConfig("set_1", config["set_1"])
         except Exception:
             pass
+
+    def _apply_set_1_checkboxes_from_config(self):
+        """从 config[set_1] 同步 wxHook / wxHui1 / wxHui2 到设置页复选框。"""
+        s1 = config.get("set_1", {})
+        pairs = (
+            ("ckbx_2_wxHook", "wxHook", 0),
+            ("ckbx_2_hui1", "wxHui1", 1),
+            ("ckbx_2_hui2", "wxHui2", 1),
+        )
+        for attr, key, default in pairs:
+            if not hasattr(self, attr):
+                continue
+            w = getattr(self, attr)
+            w.blockSignals(True)
+            w.setChecked(int(s1.get(key, default)) == 1)
+            w.blockSignals(False)
+        self._wx_auto_reply = int(s1.get("wxHook", 0)) == 1
+
+    def _save_set_1_from_checkboxes(self):
+        if "set_1" not in config:
+            config["set_1"] = {}
+        if hasattr(self, "ckbx_2_wxHook"):
+            config["set_1"]["wxHook"] = 1 if self.ckbx_2_wxHook.isChecked() else 0
+        if hasattr(self, "ckbx_2_hui1"):
+            config["set_1"]["wxHui1"] = 1 if self.ckbx_2_hui1.isChecked() else 0
+        if hasattr(self, "ckbx_2_hui2"):
+            config["set_1"]["wxHui2"] = 1 if self.ckbx_2_hui2.isChecked() else 0
+        try:
+            dataHandleObj.updateConfig("set_1", config["set_1"])
+        except Exception:
+            pass
+
+    def on_set_1_hui_changed(self, _state=None):
+        self._save_set_1_from_checkboxes()
+
+    def _is_group_wx_message(self, json_dict, reply_wxid):
+        if json_dict.get("bizchat_id"):
+            return True
+        if "@chatroom" in (reply_wxid or ""):
+            return True
+        room = (json_dict.get("room_wxid") or "").strip()
+        return bool(room and "@chatroom" in room)
 
     def on_change_deepseek_key(self):
         key = self.ledt_2_deepseek_key.text().strip()
@@ -81,11 +125,10 @@ class deepHandle(object):
             self.lb_1_0.setText("请输入 DeepSeek API Key")
             QMessageBox.warning(self, "提示", "请输入 DeepSeek API Key", QMessageBox.Ok)
             return
-        self.deep_client.api_key = key
-        os.environ["DEEPSEEK_API_KEY"] = key
         self._save_deepseek_key(key)
-        self.lb_1_0.setText("DeepSeek Key 已更新")
-        QMessageBox.information(self, "提示", "DeepSeek API Key 已更换并生效", QMessageBox.Ok)
+        self.deep_client.api_key = key
+        self.lb_1_0.setText("DeepSeek Key 已保存到配置")
+        QMessageBox.information(self, "提示", "API Key 已写入 config[set_1][apiKey] 并生效", QMessageBox.Ok)
 
     def _relayout_tab1(self):
         m = 10
@@ -166,17 +209,108 @@ class deepHandle(object):
         wxid = (json_dict.get("wxid") or "").strip()
         return wxid
 
-    def _get_ignore_senders(self):
-        names = set()
+    def init_ignore_list_ui(self):
         if not hasattr(self, "tableWidget_2"):
-            return names
-        for row in range(self.tableWidget_2.rowCount()):
-            item = self.tableWidget_2.item(row, 0)
-            if item:
-                text = item.text().strip()
-                if text:
-                    names.add(text)
-        return names
+            return
+        self.tableWidget_2.setColumnWidth(0, 220)
+        self.tableWidget_2.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget_2.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tableWidget_2.verticalHeader().setVisible(False)
+        dataHandleObj.readConfig("set_3")
+        if "set_3" not in config or not isinstance(config["set_3"], list):
+            config["set_3"] = []
+        self.refresh_ignore_list()
+
+    def refresh_ignore_list(self):
+        """从 config[set_3] 刷新不理会名单表格。"""
+        if not hasattr(self, "tableWidget_2"):
+            return
+        tab = config.get("set_3") or []
+        if len(tab) > 0:
+            self.tableWidget_2.setRowCount(len(tab))
+            for count, tmp_str in enumerate(tab):
+                self.tableWidget_2.setItem(count, 0, QTableWidgetItem(str(tmp_str)))
+        else:
+            self.tableWidget_2.setRowCount(0)
+
+    def _get_ignore_list(self):
+        tab = config.get("set_3") or []
+        return set(str(s).strip() for s in tab if s and str(s).strip())
+
+    def _wx_user_dic(self, wxid):
+        wxid = (wxid or "").strip()
+        if not wxid:
+            return None
+        if wxid in getattr(self, "wxMsgDic", {}):
+            return self.wxMsgDic[wxid]
+        if wxid in getattr(self, "wxAllDic", {}):
+            d = self.wxAllDic[wxid]
+            return {
+                "wxid": d.get("wxid") or wxid,
+                "wxcount": d.get("wxcount") or wxid,
+                "nickname": d.get("nickname") or wxid,
+            }
+        return {"nickname": wxid, "wxcount": wxid, "wxid": wxid}
+
+    def _match_ignore_entry(self, ignore, use_dic):
+        if not ignore or not use_dic:
+            return False
+        for key in ("wxcount", "wxid", "nickname"):
+            val = (use_dic.get(key) or "").strip()
+            if val and val in ignore:
+                return True
+        return False
+
+    def _is_sender_ignored(self, json_dict, nickname, reply_wxid, is_group):
+        ignore = self._get_ignore_list()
+        if not ignore:
+            return False
+        if reply_wxid in ignore:
+            return True
+        if nickname and nickname.strip() in ignore:
+            return True
+        raw_wxid = (json_dict.get("wxid") or "").strip()
+        if raw_wxid in ignore:
+            return True
+        if raw_wxid:
+            if self._match_ignore_entry(ignore, self._wx_user_dic(raw_wxid)):
+                return True
+        if not is_group:
+            if self._match_ignore_entry(ignore, self._wx_user_dic(reply_wxid)):
+                return True
+        display = self._wx_display_name(raw_wxid or reply_wxid)
+        if display and display in ignore:
+            return True
+        return False
+
+    def on_btn_2_tianjia_clicked(self):
+        if not hasattr(self, "ledt_2_wxid"):
+            return
+        wxid = self.ledt_2_wxid.text().strip()
+        if wxid == "":
+            return
+        if "set_3" not in config or not isinstance(config["set_3"], list):
+            config["set_3"] = []
+        if wxid not in config["set_3"]:
+            config["set_3"].append(wxid)
+            dataHandleObj.updateConfig("set_3", config["set_3"])
+            self.refresh_ignore_list()
+
+    def on_btn_2_shanchu_clicked(self):
+        if not hasattr(self, "ledt_2_wxid"):
+            return
+        wxid = self.ledt_2_wxid.text().strip()
+        if "set_3" not in config or not isinstance(config["set_3"], list):
+            config["set_3"] = []
+        if wxid != "":
+            if wxid in config["set_3"]:
+                config["set_3"].remove(wxid)
+                dataHandleObj.updateConfig("set_3", config["set_3"])
+                self.refresh_ignore_list()
+        elif len(config["set_3"]) != 0:
+            config["set_3"].pop()
+            dataHandleObj.updateConfig("set_3", config["set_3"])
+            self.refresh_ignore_list()
 
     def _is_hook_muted(self):
         return time.time() < getattr(self, "_deep_hook_mute_until", 0)
@@ -208,6 +342,33 @@ class deepHandle(object):
         if my_wxid and raw_wxid == my_wxid:
             return "我"
         return self._wx_display_name(reply_wxid)
+
+    def _group_role_label(self, reply_wxid):
+        jd_wxid = self.getJieDanQun1() if hasattr(self, "getJieDanQun1") else ""
+        fd_wxid = self.getFdQun1() if hasattr(self, "getFdQun1") else ""
+        if reply_wxid == jd_wxid:
+            return "接单群"
+        if reply_wxid == fd_wxid:
+            return "飞单群"
+        return "群聊"
+
+    def _group_nickname(self, reply_wxid):
+        name = self._wx_display_name(reply_wxid)
+        if name and name != reply_wxid:
+            return name
+        for combo in (getattr(self, "cbx_2_1", None), getattr(self, "cbx_2_2", None)):
+            if combo is None:
+                continue
+            text = combo.currentText().strip()
+            if "|" not in text:
+                continue
+            nick, wxid = text.split("|", 1)
+            if wxid.strip() == reply_wxid:
+                return nick.strip() or reply_wxid
+        return reply_wxid
+
+    def _group_display_tag(self, reply_wxid):
+        return "%s|%s" % (self._group_role_label(reply_wxid), self._group_nickname(reply_wxid))
 
     def _save_selected_groups(self):
         try:
@@ -264,32 +425,44 @@ class deepHandle(object):
         except Exception:
             pass
 
-    def on_deep_start(self):
-        self._save_selected_groups()
-        groups = self._get_monitor_group_wxids()
-        if not groups:
-            self.lb_1_0.setText("请先在设置页选择接单群或飞单群")
-            QMessageBox.warning(
-                self, "提示",
-                "请先在「设置」页选择接单群或飞单群，并点击「刷新群列表」。",
-                QMessageBox.Ok,
-            )
-            return
-        self._wx_auto_reply = True
-        self.hasLogin = True
-        self._update_deep_status()
-        self.lb_1_0.setText("微信 Hook 已开启，监听接单群/飞单群消息")
-        if hasattr(self, "wxHdInit"):
-            if not getattr(self, "canUseWx", False):
-                self.wxHdInit()
-            elif hasattr(self, "updateGroupList"):
-                self.updateGroupList()
-
-    def on_deep_stop(self):
-        self._wx_auto_reply = False
+    def on_wx_hook_changed(self, state):
+        enabled = state == Qt.Checked
+        if enabled:
+            self._save_selected_groups()
+            groups = self._get_monitor_group_wxids()
+            if not groups:
+                if hasattr(self, "ckbx_2_wxHook"):
+                    self.ckbx_2_wxHook.blockSignals(True)
+                    self.ckbx_2_wxHook.setChecked(False)
+                    self.ckbx_2_wxHook.blockSignals(False)
+                self._wx_auto_reply = False
+                self._update_deep_status()
+                self.lb_1_0.setText("请先在设置页选择接单群或飞单群")
+                QMessageBox.warning(
+                    self, "提示",
+                    "请先在「设置」页选择接单群或飞单群，并点击「刷新群列表」。",
+                    QMessageBox.Ok,
+                )
+                self._save_set_1_from_checkboxes()
+                return
+            self._wx_auto_reply = True
+            self.hasLogin = True
+            self.lb_1_0.setText("微信 Hook 已开启，监听接单群/飞单群消息")
+            if hasattr(self, "wxHdInit"):
+                if not getattr(self, "canUseWx", False):
+                    self.wxHdInit()
+                elif hasattr(self, "updateGroupList"):
+                    self.updateGroupList()
+        else:
+            self._wx_auto_reply = False
+            self.lb_1_0.setText("微信 Hook 已关闭，群消息不自动回复")
+        self._save_set_1_from_checkboxes()
         self._update_deep_status()
 
     def on_deep_send(self):
+        if not (self.deep_client.api_key or "").strip():
+            self.lb_1_0.setText("请先在设置页填写 API Key")
+            return
         q = self.query.toPlainText().strip()
         if not q:
             self.lb_1_0.setText("请输入内容后再发送")
@@ -307,10 +480,10 @@ class deepHandle(object):
             self.sendTextMsg0(response_text)
 
     def handleWxMsg(self, json_dict):
-        # if not self._wx_auto_reply:
-        #     return
-        # if self._is_hook_muted():
-        #     return
+        if not self._wx_auto_reply:
+            return
+        if self._is_hook_muted():
+            return
 
         msgtype = json_dict.get("msgtype")
         if msgtype not in (1, "1"):
@@ -324,9 +497,16 @@ class deepHandle(object):
         if not reply_wxid:
             return
 
-        monitor_groups = self._get_monitor_group_wxids()
-        if reply_wxid not in monitor_groups:
-            return
+        is_group = self._is_group_wx_message(json_dict, reply_wxid)
+        if is_group:
+            if int(config["set_1"].get("wxHui1", 1)) != 1:
+                return
+            monitor_groups = self._get_monitor_group_wxids()
+            if reply_wxid not in monitor_groups:
+                return
+        else:
+            if int(config["set_1"].get("wxHui2", 1)) != 1:
+                return
 
         nickname, pure_content = self._parse_wx_content(str(content))
         if not pure_content:
@@ -334,24 +514,14 @@ class deepHandle(object):
         if self._is_bot_echo(pure_content):
             return
 
-        ignore = self._get_ignore_senders()
-        if nickname and nickname in ignore:
-            return
-        if reply_wxid in ignore:
+        if self._is_sender_ignored(json_dict, nickname, reply_wxid, is_group):
             return
 
         sender = self._sender_label(json_dict, nickname, reply_wxid)
-        jd_wxid = self.getJieDanQun1() if hasattr(self, "getJieDanQun1") else ""
-        fd_wxid = self.getFdQun1() if hasattr(self, "getFdQun1") else ""
-        if reply_wxid == jd_wxid:
-            group_label = "接单群"
-        elif reply_wxid == fd_wxid:
-            group_label = "飞单群"
-        else:
-            group_label = "群聊"
-        display_sender = "[%s] %s" % (group_label, sender)
+        group_tag = self._group_display_tag(reply_wxid)
+        display_sender = "[%s] %s" % (group_tag, sender)
         self.append_deep_message(display_sender, pure_content)
-        self.lb_1_0.setText("DeepSeek 正在回复 %s..." % group_label)
+        self.lb_1_0.setText("DeepSeek 正在回复 %s..." % group_tag)
         QApplication.processEvents()
 
         response_text = self._call_deepseek(pure_content)

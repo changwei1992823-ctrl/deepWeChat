@@ -11,7 +11,7 @@ except Exception:
 
 class DeepSeekClient:
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY") or "sk-a95ac8deec7b47439367f6bd57163ec6"
+        self.api_key = (api_key or "").strip() or None
         self.api_base = os.environ.get("DEEPSEEK_API_BASE")
 
     def _extract_deepseek_response(self, response):

@@ -166,7 +166,7 @@
         <x>10</x>
         <y>96</y>
         <width>721</width>
-        <height>112</height>
+        <height>121</height>
        </rect>
       </property>
       <property name="font">
@@ -183,7 +183,7 @@
       <widget class="QLabel" name="label_18">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>60</x>
          <y>20</y>
          <width>41</width>
          <height>24</height>
@@ -205,7 +205,7 @@
       <widget class="QLabel" name="label_19">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>60</x>
          <y>50</y>
          <width>41</width>
          <height>24</height>
@@ -227,7 +227,7 @@
       <widget class="QPushButton" name="btn_2_shuaxin">
        <property name="geometry">
         <rect>
-         <x>70</x>
+         <x>160</x>
          <y>83</y>
          <width>84</width>
          <height>26</height>
@@ -249,7 +249,7 @@
       <widget class="QComboBox" name="cbx_2_1">
        <property name="geometry">
         <rect>
-         <x>60</x>
+         <x>110</x>
          <y>20</y>
          <width>151</width>
          <height>24</height>
@@ -265,7 +265,7 @@
       <widget class="QComboBox" name="cbx_2_2">
        <property name="geometry">
         <rect>
-         <x>60</x>
+         <x>110</x>
          <y>50</y>
          <width>151</width>
          <height>24</height>
@@ -278,12 +278,56 @@
         </font>
        </property>
       </widget>
+      <widget class="QCheckBox" name="ckbx_2_hui1">
+       <property name="geometry">
+        <rect>
+         <x>330</x>
+         <y>30</y>
+         <width>141</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:rgb(51,51,90);</string>
+       </property>
+       <property name="text">
+        <string>接群消息</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="ckbx_2_hui2">
+       <property name="geometry">
+        <rect>
+         <x>330</x>
+         <y>70</y>
+         <width>141</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:rgb(51,51,90);</string>
+       </property>
+       <property name="text">
+        <string>接个人消息</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_8">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>216</y>
+        <y>220</y>
         <width>258</width>
         <height>92</height>
        </rect>
@@ -439,7 +483,7 @@
       <property name="geometry">
        <rect>
         <x>276</x>
-        <y>216</y>
+        <y>220</y>
         <width>455</width>
         <height>372</height>
        </rect>
@@ -575,39 +619,35 @@
        </property>
       </widget>
      </widget>
-     <widget class="QPushButton" name="btn_1_start">
+     <widget class="QCheckBox" name="ckbx_2_wxHook">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>10</y>
-        <width>48</width>
-        <height>32</height>
+        <y>12</y>
+        <width>131</width>
+        <height>28</height>
        </rect>
       </property>
-      <property name="text">
-       <string>开始</string>
+      <property name="font">
+       <font>
+        <family>Microsoft YaHei</family>
+        <pointsize>10</pointsize>
+       </font>
       </property>
-     </widget>
-     <widget class="QPushButton" name="btn_1_stop">
-      <property name="geometry">
-       <rect>
-        <x>62</x>
-        <y>10</y>
-        <width>48</width>
-        <height>32</height>
-       </rect>
+      <property name="styleSheet">
+       <string notr="true">color:rgb(51,51,90);</string>
       </property>
       <property name="text">
-       <string>停止</string>
+       <string>微信Hook回复</string>
       </property>
      </widget>
      <widget class="QGroupBox" name="groupBox_2">
       <property name="geometry">
        <rect>
-        <x>118</x>
+        <x>150</x>
         <y>10</y>
-        <width>155</width>
-        <height>78</height>
+        <width>121</width>
+        <height>81</height>
        </rect>
       </property>
       <property name="font">
@@ -643,7 +683,7 @@
         <string>模式1-3.9.12.55</string>
        </property>
       </widget>
-      <widget class="QRadioButton" name="rdbt_2_7">
+      <widget class="QRadioButton" name="rdbt_2_2">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -672,7 +712,7 @@
         <x>280</x>
         <y>10</y>
         <width>451</width>
-        <height>54</height>
+        <height>61</height>
        </rect>
       </property>
       <property name="font">
@@ -725,9 +765,6 @@
        </property>
        <property name="styleSheet">
         <string notr="true">background-color:rgb(255,255,255);color:rgb(51,51,90);</string>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
        </property>
        <property name="placeholderText">
         <string>输入 DeepSeek Key</string>

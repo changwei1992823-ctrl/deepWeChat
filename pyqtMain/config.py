@@ -83,26 +83,28 @@ config["ads"] = {
 
 ### 第二页 设置
 config["set_1"] = {
-	"jiekou": 1,  # 接口选择
 	"hookMd": 1,  # hook模式
 	"jdQun": "",  # 接单群
 	"fdQun": "",  # 飞单群
-	"jdQy": 0,
-	"fdQy": 0,
-	"jdQyq": "",  # 接单企业群
-	"fdQyq": "",  # 飞单企业群
-	"buJd": 0,
-	"buFd": 0,
 
 	"noWx": 0,
+
+	"wxHook": 0,
+	"wxHui1": 1,
+	"wxHui2": 1,
+
+
+	"apiKey": "sk-a95ac8deec7b47439367f6bd57163ec6"
 }
 
 config["set_2"] = {
 	"zdAgree": 1,   # 自动同意好友 
-	"zdMsg": "你好！财神科技欢迎您！",# 发送xxx
+	"zdMsg": "你好！威神科技欢迎您！",# 发送xxx
 	"msg": "添加好友携带描述！",
 }
 
+# 不理会名单（wxid 或昵称）
+config["set_3"] = []
 
 ### 设置页面 赔率部分
 config["qy_qun"] = []
@@ -110,6 +112,8 @@ config["qy_qun"] = []
 config["setRead"] = [
 	# "pl_1314", "pl_fei1314", "pl_wanfa", "pl_ck", "xian_e", "set_ot", "pl_dl", "sz_fw", "machine",
 	"qy_qun",
+	"set_1",
+	"set_3",
 ]
 
 
