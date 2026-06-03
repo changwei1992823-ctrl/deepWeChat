@@ -193,7 +193,9 @@ flowchart LR
 - 全局样式：`ui_style.py` 的 `APP_STYLESHEET`，在 `main.initUi` 中 `apply_app_style`。
 - 窗口标题来自 `config["softName"]`（默认「ai微信直接聊」）+ `GM["version"]`。
 
-有需要交流的可以联系我Q:3769886905
+wedo.exe,ConsoleApp2.exe,Dll1.dll 我放了一份在pyqtMain//dist//media//tool 所以打开DSKJ.exe可以直接用
+
+有需要源码交流的可以联系我Q:3769886905
 
 ---
 

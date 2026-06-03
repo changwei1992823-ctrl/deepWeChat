@@ -10,7 +10,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -115,8 +114,8 @@ dmypy.json
 .pyre/
 
 __pycache__/
-build/
-dist/
+
+
 logs/
 *.sqlite
 ahistory/
@@ -125,3 +124,18 @@ ahistory/
 mTest/
 test/
 temp/
+
+
+chat_history.json
+
+
+
+dist/
+build/
+media/
+
+
+
+
+
+
